@@ -1,0 +1,12 @@
+{
+  "apparent_buffer_days": 56,
+  "chain": [
+    "DM1",
+    "DM2",
+    "DM3",
+    "DM4"
+  ],
+  "overstatement_ratio": 5.091,
+  "shared_buffer_days": 11,
+  "shared_buffer_verified_by_propagation": 11
+}

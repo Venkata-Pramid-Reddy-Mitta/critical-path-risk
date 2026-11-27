@@ -1,0 +1,102 @@
+{
+  "anchors": {
+    "coverage_branch_pct": [
+      "{}% branch"
+    ],
+    "coverage_line_pct": [
+      "{}% line",
+      "{}% coverage"
+    ],
+    "critical_path_length": [
+      "{}-task critical",
+      "critical path of {}"
+    ],
+    "hidden_task_delay_days": [
+      "go-live {} days",
+      "by {} days"
+    ],
+    "hidden_task_float_days": [
+      "{} days of float",
+      "{}-day float"
+    ],
+    "hidden_task_rank": [
+      "rank {}",
+      "ranks {}"
+    ],
+    "joint_delay_days": [
+      "go-live {} days"
+    ],
+    "joint_slip_each_days": [
+      "slip of {} days",
+      "{} days each"
+    ],
+    "overstatement_ratio": [
+      "{}x"
+    ],
+    "project_finish_days": [
+      "{} working days",
+      "{}-day program"
+    ],
+    "rerouting_days": [
+      "{}-day slip"
+    ],
+    "robustness_median_ratio": [
+      "median {}x"
+    ],
+    "robustness_overstated_pct": [
+      "in {}% of",
+      "{}% of"
+    ],
+    "robustness_programs": [
+      "{} random programs",
+      "{} generated programs"
+    ],
+    "robustness_reroute_pct": [
+      "{}% of"
+    ],
+    "slip_days": [
+      "{}-day slip"
+    ],
+    "task_count": [
+      "{}-task",
+      "{} tasks"
+    ],
+    "tests_total": [
+      "{} tests"
+    ],
+    "worst_chain_apparent_days": [
+      "sums to {}",
+      "{} task-days"
+    ],
+    "worst_chain_shared_days": [
+      "shared buffer of {}",
+      "shared buffer is {}"
+    ]
+  },
+  "checked_documents": [
+    "README.md"
+  ],
+  "metrics": {
+    "coverage_branch_pct": 100.0,
+    "coverage_line_pct": 100.0,
+    "critical_path_length": 8,
+    "hidden_task_delay_days": 2,
+    "hidden_task_float_days": 3,
+    "hidden_task_rank": 9,
+    "joint_delay_days": 11,
+    "joint_slip_each_days": 11,
+    "overstatement_ratio": 5.1,
+    "project_finish_days": 75,
+    "rerouting_days": 4,
+    "robustness_median_ratio": 4.0,
+    "robustness_overstated_pct": 100.0,
+    "robustness_programs": 1000,
+    "robustness_reroute_pct": 29.1,
+    "slip_days": 5,
+    "task_count": 16,
+    "tests_total": 154,
+    "worst_chain_apparent_days": 56,
+    "worst_chain_shared_days": 11
+  },
+  "note": "every value is produced by running the suite and the five experiments"
+}

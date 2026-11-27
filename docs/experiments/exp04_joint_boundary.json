@@ -1,0 +1,10 @@
+{
+  "joint_delay_days": 11,
+  "pair": [
+    "DM2",
+    "DM3"
+  ],
+  "single_delay_a_days": 0,
+  "single_delay_b_days": 0,
+  "slip_each_days": 11
+}

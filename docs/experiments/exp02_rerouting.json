@@ -1,0 +1,17 @@
+{
+  "all_slack_thresholds": {
+    "AM1": 4,
+    "CM3": 12,
+    "CM4": 32,
+    "DM1": 12,
+    "DM2": 12,
+    "DM3": 12,
+    "DM4": 24,
+    "TD1": 28
+  },
+  "nearest_rerouting_days": 4,
+  "nearest_task": "AM1",
+  "nearest_task_float_days": 3,
+  "review_blind_spot_days": 7,
+  "within_blind_spot": true
+}

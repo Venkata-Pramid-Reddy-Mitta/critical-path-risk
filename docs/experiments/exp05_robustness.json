@@ -1,0 +1,12 @@
+{
+  "max_worst_ratio": 52.0,
+  "median_worst_ratio": 4.0,
+  "overstated_pct": 100.0,
+  "overstatement_threshold": 2.0,
+  "programs_generated": 1000,
+  "programs_overstated": 1000,
+  "programs_with_a_slack_chain": 1000,
+  "programs_with_reroute_in_window": 291,
+  "reroute_in_window_pct": 29.1,
+  "rerouting_alarm_days": 7
+}

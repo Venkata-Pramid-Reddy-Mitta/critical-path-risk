@@ -1,0 +1,106 @@
+{
+  "critical_task_count": 8,
+  "hidden_task": "AM1",
+  "hidden_task_delay_days": 2,
+  "hidden_task_float_days": 3,
+  "hidden_task_rank": 9,
+  "slip_days": 5,
+  "table": [
+    {
+      "critical": true,
+      "delay_days": 5,
+      "float_days": 0,
+      "task": "CM1"
+    },
+    {
+      "critical": true,
+      "delay_days": 5,
+      "float_days": 0,
+      "task": "CM2"
+    },
+    {
+      "critical": true,
+      "delay_days": 5,
+      "float_days": 0,
+      "task": "AM2"
+    },
+    {
+      "critical": true,
+      "delay_days": 5,
+      "float_days": 0,
+      "task": "AM3"
+    },
+    {
+      "critical": true,
+      "delay_days": 5,
+      "float_days": 0,
+      "task": "AM4"
+    },
+    {
+      "critical": true,
+      "delay_days": 5,
+      "float_days": 0,
+      "task": "TD2"
+    },
+    {
+      "critical": true,
+      "delay_days": 5,
+      "float_days": 0,
+      "task": "TD3"
+    },
+    {
+      "critical": true,
+      "delay_days": 5,
+      "float_days": 0,
+      "task": "TD4"
+    },
+    {
+      "critical": false,
+      "delay_days": 2,
+      "float_days": 3,
+      "task": "AM1"
+    },
+    {
+      "critical": false,
+      "delay_days": 0,
+      "float_days": 11,
+      "task": "DM1"
+    },
+    {
+      "critical": false,
+      "delay_days": 0,
+      "float_days": 11,
+      "task": "CM3"
+    },
+    {
+      "critical": false,
+      "delay_days": 0,
+      "float_days": 11,
+      "task": "DM2"
+    },
+    {
+      "critical": false,
+      "delay_days": 0,
+      "float_days": 11,
+      "task": "DM3"
+    },
+    {
+      "critical": false,
+      "delay_days": 0,
+      "float_days": 23,
+      "task": "DM4"
+    },
+    {
+      "critical": false,
+      "delay_days": 0,
+      "float_days": 27,
+      "task": "TD1"
+    },
+    {
+      "critical": false,
+      "delay_days": 0,
+      "float_days": 31,
+      "task": "CM4"
+    }
+  ]
+}
