@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>critical-path-risk: Schedule Blast-Radius Explorer</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #111c33;
+      --panel-2: #0f172a;
+      --border: #24324a;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #f97316;
+      --danger: #ef4444;
+      --warn: #fbbf24;
+      --info: #38bdf8;
+      --ok: #22c55e;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a { color: var(--info); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 64px; }
+    .banner { width: 100%; border-radius: 14px; border: 1px solid var(--border); display: block; }
+    .nav {
+      display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between;
+      align-items: center; margin: 18px 0 26px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 16px; font-size: 14px; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-family: var(--mono); font-size: 12px; font-weight: 600;
+      background: #1e293b; color: #cbd5e1; border: 1px solid var(--border);
+    }
+    .badge.danger { background: #450a0a; color: #fecaca; border-color: #991b1b; }
+    .badge.warn { background: #451a03; color: #fde68a; border-color: #b45309; }
+    .badge.info { background: #082f49; color: #bae6fd; border-color: #0369a1; }
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px; margin-bottom: 28px;
+    }
+    .kpi {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px;
+    }
+    .kpi-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .kpi-val { font-family: var(--mono); font-size: 28px; font-weight: 800; margin: 6px 0; }
+    .kpi-sub { font-size: 13px; color: var(--muted); }
+    .section {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px; margin-bottom: 24px;
+    }
+    h2 { margin: 0 0 8px; font-size: 20px; }
+    .lead { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .btn {
+      background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+      border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; font-weight: 600;
+    }
+    .btn.active, .btn:hover { background: #1e293b; border-color: var(--accent); color: #fff; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    tr.highlight { background: rgba(251, 191, 36, 0.08); }
+    tr.chain { background: rgba(56, 189, 248, 0.06); }
+    .bar-bg { width: 110px; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+    .bar-fill { height: 100%; border-radius: 4px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .exp-box {
+      background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 18px;
+    }
+    .exp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 12px; }
+    .exp-stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+    .exp-stat .k { font-size: 12px; color: var(--muted); }
+    .exp-stat .v { font-family: var(--mono); font-size: 20px; font-weight: 700; margin-top: 4px; color: #f8fafc; }
+    .diagram-img { width: 100%; border-radius: 10px; background: #fff; padding: 12px; }
+    .adr-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+    .adr-card { background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 13px; }
+    footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <img class="banner" src="banner.svg" alt="critical-path-risk banner">
+
+    <div class="nav">
+      <div class="nav-links">
+        <a href="#explorer">Blast-Radius Explorer</a>
+        <a href="#experiments">Experiments (1-5)</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#adrs">Decisions (ADRs)</a>
+      </div>
+      <div>
+        <span class="badge">Pure Python Stdlib</span>
+        <span class="badge">154 Tests / 100% Coverage</span>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Shared-Float Overstatement</div>
+        <div class="kpi-val" style="color: var(--accent);">56d -&gt; 11d (5.1x)</div>
+        <div class="kpi-sub">DM1-DM4 column sums to 56 task-days; propagation proves 11 days.</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Hidden Near-Critical Risk</div>
+        <div class="kpi-val" style="color: var(--warn);">AM1 (Rank #9)</div>
+        <div class="kpi-sub">3d float; a 4-day slip re-routes the critical path; 5d delays go-live 2d.</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Measured Blind Spot</div>
+        <div class="kpi-val" style="color: var(--danger);">+11d Joint Slip</div>
+        <div class="kpi-sub">DM2 and DM3 each score 0d delay alone at 11d, but +11d together.</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">1,000-Graph Robustness</div>
+        <div class="kpi-val" style="color: var(--info);">100% / 4.0x</div>
+        <div class="kpi-sub">100% overstated &gt;= 2x (median 4.0x); 29.1% have a &lt;= 7d re-route trap.</div>
+      </div>
+    </div>
+
+    <section class="section" id="explorer">
+      <h2>Interactive Task Blast-Radius Explorer</h2>
+      <p class="lead">Filter the 16-task banking modernization schedule (75 working days, 8 critical tasks) to compare total float against propagated go-live delay under a 5-day slip.</p>
+      <div class="filters">
+        <button class="btn active" data-filter="all">All 16 Tasks</button>
+        <button class="btn" data-filter="noncritical">Non-Critical Only (8)</button>
+        <button class="btn" data-filter="chain">Data Migration Chain (DM1-DM4)</button>
+        <button class="btn" data-filter="critical">Critical Path Only (8)</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Task</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Total Float</th>
+              <th>Free Float</th>
+              <th>5-Day Slip Delay</th>
+              <th>Re-Route Slip</th>
+            </tr>
+          </thead>
+          <tbody id="task-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="experiments">
+      <h2>Reproducible Experiments</h2>
+      <p class="lead">Every figure below is read directly from the committed JSON outputs generated by <code>make verify</code>.</p>
+      <div class="tabs" id="exp-tabs">
+        <button class="btn active" data-exp="exp01">Exp 1: Shared Float</button>
+        <button class="btn" data-exp="exp02">Exp 2: Re-Routing</button>
+        <button class="btn" data-exp="exp03">Exp 3: Blast Radius</button>
+        <button class="btn" data-exp="exp04">Exp 4: Joint Boundary</button>
+        <button class="btn" data-exp="exp05">Exp 5: 1,000 Graphs</button>
+      </div>
+      <div class="exp-box" id="exp-content"></div>
+    </section>
+
+    <section class="section" id="architecture">
+      <h2>Architecture &amp; Verification Pipeline</h2>
+      <p class="lead">Pure standard-library CPM engine with deterministic tie-breaking, opt-in CI policy gate (exit 0 / 2 / 1), and machine-checked receipts.</p>
+      <img class="diagram-img" src="diagrams/architecture.svg" alt="critical-path-risk architecture diagram">
+    </section>
+
+    <section class="section" id="adrs">
+      <h2>Architecture Decision Records</h2>
+      <div class="adr-list">
+        <div class="adr-card"><strong>ADR-001</strong><br>Hand-rolled CPM over NetworkX to keep the core algorithm visible and zero-dependency.</div>
+        <div class="adr-card"><strong>ADR-002</strong><br>Finish-to-start dependencies only, refusing richer lag models rather than silently approximating.</div>
+        <div class="adr-card"><strong>ADR-003</strong><br>Insertion-order Kahn queue and topological tie-breaking for determinism under hash randomization.</div>
+        <div class="adr-card"><strong>ADR-004</strong><br>Distinguishing total float from free float, where the 56d-vs-11d overstatement lives.</div>
+        <div class="adr-card"><strong>ADR-005</strong><br>Three-state CLI exit codes (0 clean, 2 flagged, 1 error) and why the gate is opt-in.</div>
+      </div>
+    </section>
+
+    <footer>
+      critical-path-risk | MIT License | Copyright 2026 Venkata Pramid Reddy Mitta
+    </footer>
+  </div>
+
+  <script>
+    const DATA = {
+  "tasks": [
+    {
+      "rank": 1,
+      "task": "CM1",
+      "name": "Landing zone design",
+      "workstream": "Cloud Migration",
+      "duration": 8,
+      "critical": true,
+      "float_days": 0,
+      "free_float": 0,
+      "delay_days": 5,
+      "reroute_days": 0,
+      "in_dm_chain": false
+    },
+    {
+      "rank": 2,
+      "task": "CM2",
+      "name": "Network and identity baseline",
+      "workstream": "Cloud Migration",
+      "duration": 10,
+      "critical": true,
+      "float_days": 0,
+      "free_float": 0,
+      "delay_days": 5,
+      "reroute_days": 0,
+      "in_dm_chain": false
+    },
+    {
+      "rank": 3,
+      "task": "AM2",
+      "name": "Refactor authentication service",
+      "workstream": "App Modernization",
+      "duration": 11,
+      "critical": true,
+      "float_days": 0,
+      "free_float": 0,
+      "delay_days": 5,
+      "reroute_days": 0,
+      "in_dm_chain": false
+    },
+    {
+      "rank": 4,
+      "task": "AM3",
+      "name": "Refactor payments service",
+      "workstream": "App Modernization",
+      "duration": 14,
+      "critical": true,
+      "float_days": 0,
+      "free_float": 0,
+      "delay_days": 5,
+      "reroute_days": 0,
+      "in_dm_chain": false
+    },
+    {
+      "rank": 5,
+      "task": "AM4",
+      "name": "Containerize and build pipeline",
+      "workstream": "App Modernization",
+      "duration": 8,
+      "critical": true,
+      "float_days": 0,
+      "free_float": 0,
+      "delay_days": 5,
+      "reroute_days": 0,
+      "in_dm_chain": false
+    },
+    {
+      "rank": 6,
+      "task": "TD2",
+      "name": "Integration test suite",
+      "workstream": "Testing and Deployment",
+      "duration": 10,
+      "critical": true,
+      "float_days": 0,
+      "free_float": 0,
+      "delay_days": 5,
+      "reroute_days": 0,
+      "in_dm_chain": false
+    },
+    {
+      "rank": 7,
+      "task": "TD3",
+      "name": "User acceptance testing",
+      "workstream": "Testing and Deployment",
+      "duration": 9,
+      "critical": true,
+      "float_days": 0,
+      "free_float": 0,
+      "delay_days": 5,
+      "reroute_days": 0,
+      "in_dm_chain": false
+    },
+    {
+      "rank": 8,
+      "task": "TD4",
+      "name": "Production cutover and go-live",
+      "workstream": "Testing and Deployment",
+      "duration": 5,
+      "critical": true,
+      "float_days": 0,
+      "free_float": 0,
+      "delay_days": 5,
+      "reroute_days": 0,
+      "in_dm_chain": false
+    },
+    {
+      "rank": 9,
+      "task": "AM1",
+      "name": "Service inventory and assessment",
+      "workstream": "App Modernization",
+      "duration": 7,
+      "critical": false,
+      "float_days": 3,
+      "free_float": 3,
+      "delay_days": 2,
+      "reroute_days": 4,
+      "in_dm_chain": false
+    },
+    {
+      "rank": 10,
+      "task": "DM1",
+      "name": "Schema mapping",
+      "workstream": "Data Migration",
+      "duration": 9,
+      "critical": false,
+      "float_days": 11,
+      "free_float": 0,
+      "delay_days": 0,
+      "reroute_days": 12,
+      "in_dm_chain": true
+    },
+    {
+      "rank": 11,
+      "task": "CM3",
+      "name": "Core landing zone build",
+      "workstream": "Cloud Migration",
+      "duration": 12,
+      "critical": false,
+      "float_days": 11,
+      "free_float": 0,
+      "delay_days": 0,
+      "reroute_days": 12,
+      "in_dm_chain": false
+    },
+    {
+      "rank": 12,
+      "task": "DM2",
+      "name": "ETL build",
+      "workstream": "Data Migration",
+      "duration": 13,
+      "critical": false,
+      "float_days": 11,
+      "free_float": 0,
+      "delay_days": 0,
+      "reroute_days": 12,
+      "in_dm_chain": true
+    },
+    {
+      "rank": 13,
+      "task": "DM3",
+      "name": "Bulk migration dry run",
+      "workstream": "Data Migration",
+      "duration": 10,
+      "critical": false,
+      "float_days": 11,
+      "free_float": 0,
+      "delay_days": 0,
+      "reroute_days": 12,
+      "in_dm_chain": true
+    },
+    {
+      "rank": 14,
+      "task": "DM4",
+      "name": "Reconciliation and cutover rehearsal",
+      "workstream": "Data Migration",
+      "duration": 7,
+      "critical": false,
+      "float_days": 23,
+      "free_float": 23,
+      "delay_days": 0,
+      "reroute_days": 24,
+      "in_dm_chain": true
+    },
+    {
+      "rank": 15,
+      "task": "TD1",
+      "name": "Test strategy and environments",
+      "workstream": "Testing and Deployment",
+      "duration": 6,
+      "critical": false,
+      "float_days": 27,
+      "free_float": 27,
+      "delay_days": 0,
+      "reroute_days": 28,
+      "in_dm_chain": false
+    },
+    {
+      "rank": 16,
+      "task": "CM4",
+      "name": "Production subscription hardening",
+      "workstream": "Cloud Migration",
+      "duration": 9,
+      "critical": false,
+      "float_days": 31,
+      "free_float": 31,
+      "delay_days": 0,
+      "reroute_days": 32,
+      "in_dm_chain": false
+    }
+  ],
+  "exp01": {
+    "apparent_buffer_days": 56,
+    "chain": [
+      "DM1",
+      "DM2",
+      "DM3",
+      "DM4"
+    ],
+    "overstatement_ratio": 5.091,
+    "shared_buffer_days": 11,
+    "shared_buffer_verified_by_propagation": 11
+  },
+  "exp02": {
+    "all_slack_thresholds": {
+      "AM1": 4,
+      "CM3": 12,
+      "CM4": 32,
+      "DM1": 12,
+      "DM2": 12,
+      "DM3": 12,
+      "DM4": 24,
+      "TD1": 28
+    },
+    "nearest_rerouting_days": 4,
+    "nearest_task": "AM1",
+    "nearest_task_float_days": 3,
+    "review_blind_spot_days": 7,
+    "within_blind_spot": true
+  },
+  "exp03": {
+    "critical_task_count": 8,
+    "hidden_task": "AM1",
+    "hidden_task_delay_days": 2,
+    "hidden_task_float_days": 3,
+    "hidden_task_rank": 9,
+    "slip_days": 5,
+    "table": [
+      {
+        "critical": true,
+        "delay_days": 5,
+        "float_days": 0,
+        "task": "CM1"
+      },
+      {
+        "critical": true,
+        "delay_days": 5,
+        "float_days": 0,
+        "task": "CM2"
+      },
+      {
+        "critical": true,
+        "delay_days": 5,
+        "float_days": 0,
+        "task": "AM2"
+      },
+      {
+        "critical": true,
+        "delay_days": 5,
+        "float_days": 0,
+        "task": "AM3"
+      },
+      {
+        "critical": true,
+        "delay_days": 5,
+        "float_days": 0,
+        "task": "AM4"
+      },
+      {
+        "critical": true,
+        "delay_days": 5,
+        "float_days": 0,
+        "task": "TD2"
+      },
+      {
+        "critical": true,
+        "delay_days": 5,
+        "float_days": 0,
+        "task": "TD3"
+      },
+      {
+        "critical": true,
+        "delay_days": 5,
+        "float_days": 0,
+        "task": "TD4"
+      },
+      {
+        "critical": false,
+        "delay_days": 2,
+        "float_days": 3,
+        "task": "AM1"
+      },
+      {
+        "critical": false,
+        "delay_days": 0,
+        "float_days": 11,
+        "task": "DM1"
+      },
+      {
+        "critical": false,
+        "delay_days": 0,
+        "float_days": 11,
+        "task": "CM3"
+      },
+      {
+        "critical": false,
+        "delay_days": 0,
+        "float_days": 11,
+        "task": "DM2"
+      },
+      {
+        "critical": false,
+        "delay_days": 0,
+        "float_days": 11,
+        "task": "DM3"
+      },
+      {
+        "critical": false,
+        "delay_days": 0,
+        "float_days": 23,
+        "task": "DM4"
+      },
+      {
+        "critical": false,
+        "delay_days": 0,
+        "float_days": 27,
+        "task": "TD1"
+      },
+      {
+        "critical": false,
+        "delay_days": 0,
+        "float_days": 31,
+        "task": "CM4"
+      }
+    ]
+  },
+  "exp04": {
+    "joint_delay_days": 11,
+    "pair": [
+      "DM2",
+      "DM3"
+    ],
+    "single_delay_a_days": 0,
+    "single_delay_b_days": 0,
+    "slip_each_days": 11
+  },
+  "exp05": {
+    "max_worst_ratio": 52.0,
+    "median_worst_ratio": 4.0,
+    "overstated_pct": 100.0,
+    "overstatement_threshold": 2.0,
+    "programs_generated": 1000,
+    "programs_overstated": 1000,
+    "programs_with_a_slack_chain": 1000,
+    "programs_with_reroute_in_window": 291,
+    "reroute_in_window_pct": 29.1,
+    "rerouting_alarm_days": 7
+  }
+};
+
+    function renderTable(filter) {
+      const tbody = document.getElementById("task-tbody");
+      const rows = DATA.tasks.filter(t => {
+        if (filter === "noncritical") return !t.critical;
+        if (filter === "critical") return t.critical;
+        if (filter === "chain") return t.in_dm_chain;
+        return true;
+      });
+      tbody.innerHTML = rows.map(t => {
+        const rowClass = t.task === "AM1" ? "highlight" : (t.in_dm_chain ? "chain" : "");
+        const statusBadge = t.critical
+          ? '<span class="badge danger">Critical</span>'
+          : (t.task === "AM1"
+            ? '<span class="badge warn">Near-Critical</span>'
+            : (t.in_dm_chain ? '<span class="badge info">Shared Chain</span>' : '<span class="badge">Slack</span>'));
+        const delayPct = Math.min(100, (t.delay_days / 5) * 100);
+        const barColor = t.delay_days >= 5 ? "#ef4444" : (t.delay_days > 0 ? "#fbbf24" : "#334155");
+        const reroute = t.critical ? "0d (on path)" : (t.reroute_days + "d");
+        return `<tr class="${rowClass}">
+          <td><strong>#${t.rank}</strong></td>
+          <td><code>${t.task}</code></td>
+          <td>${t.name}</td>
+          <td>${statusBadge}</td>
+          <td>${t.float_days}d</td>
+          <td>${t.free_float}d</td>
+          <td><span class="bar-bg"><span class="bar-fill" style="width:${delayPct}%;background:${barColor}"></span></span><strong>+${t.delay_days}d</strong></td>
+          <td>${reroute}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    const EXP_META = {
+      exp01: {
+        title: "Experiment 1: Shared-Float Deception (DM1 -> DM2 -> DM3 -> DM4)",
+        desc: "Compares summing the total-float column across the data-migration chain against slipping the head task until go-live moves.",
+        stats: d => [
+          ["Apparent Buffer (Sum)", d.apparent_buffer_days + " task-days"],
+          ["True Shared Buffer", d.shared_buffer_days + " days"],
+          ["Propagation Verified", d.shared_buffer_verified_by_propagation + " days"],
+          ["Overstatement Ratio", d.overstatement_ratio.toFixed(1) + "x"]
+        ]
+      },
+      exp02: {
+        title: "Experiment 2: Critical-Path Re-Routing Threshold",
+        desc: "Finds the smallest slip on any non-critical task that forces the critical path to re-route onto it.",
+        stats: d => [
+          ["Nearest Slack Task", d.nearest_task],
+          ["Reported Float", d.nearest_task_float_days + " days"],
+          ["Re-Route Threshold", d.nearest_rerouting_days + "-day slip"],
+          ["Review Blind Spot", "<= " + d.review_blind_spot_days + " days"]
+        ]
+      },
+      exp03: {
+        title: "Experiment 3: Propagated Blast-Radius Ranking (5-Day Slip)",
+        desc: "Inflates each task by 5 working days, re-runs CPM, and ranks tasks by actual go-live delay rather than static float.",
+        stats: d => [
+          ["Critical Path Tasks", d.critical_task_count],
+          ["Top Hidden Task", d.hidden_task],
+          ["Blast-Radius Rank", "#" + d.hidden_task_rank],
+          ["Go-Live Delay (5d Slip)", "+" + d.hidden_task_delay_days + " days"]
+        ]
+      },
+      exp04: {
+        title: "Experiment 4: Joint Pairwise Slip Boundary (What This Tool Cannot See)",
+        desc: "Demonstrates the single-slip boundary: two tasks on the same chain that are individually safe but delay go-live when both slip.",
+        stats: d => [
+          ["Task Pair", d.pair.join(" + ")],
+          ["Slip Each", d.slip_each_days + " days"],
+          ["Individual Delays", d.single_delay_a_days + "d / " + d.single_delay_b_days + "d"],
+          ["Joint Go-Live Delay", "+" + d.joint_delay_days + " days"]
+        ]
+      },
+      exp05: {
+        title: "Experiment 5: Robustness Across 1,000 Generated Programs",
+        desc: "Runs the engine on 1,000 seeded random DAGs to confirm the shared-float deception is structural, not an artifact of one fixture.",
+        stats: d => [
+          ["Programs Generated", d.programs_generated.toLocaleString()],
+          ["Overstated >= 2x", d.overstated_pct + "%"],
+          ["Median Overstatement", d.median_worst_ratio + "x"],
+          ["Within 7d Re-Route Alarm", d.reroute_in_window_pct + "%"]
+        ]
+      }
+    };
+
+    function renderExp(key) {
+      const meta = EXP_META[key];
+      const d = DATA[key];
+      const box = document.getElementById("exp-content");
+      const statsHtml = meta.stats(d).map(([k, v]) =>
+        `<div class="exp-stat"><div class="k">${k}</div><div class="v">${v}</div></div>`
+      ).join("");
+      box.innerHTML = `<h3 style="margin:0 0 6px;font-size:17px;">${meta.title}</h3>
+        <p style="margin:0;color:var(--muted);font-size:14px;">${meta.desc}</p>
+        <div class="exp-grid">${statsHtml}</div>`;
+    }
+
+    document.querySelectorAll("[data-filter]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-filter]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderTable(btn.dataset.filter);
+      });
+    });
+
+    document.querySelectorAll("[data-exp]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-exp]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderExp(btn.dataset.exp);
+      });
+    });
+
+    renderTable("all");
+    renderExp("exp01");
+  </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "segments": [
+    {
+      "command": "cpr analyze fixtures/program.json",
+      "exit_code": 0,
+      "duration_s": 0.06,
+      "output": "critical-path-risk analysis\n====================================================\ntasks: 16    project finish: 75 working days\ncritical path (8 tasks): CM1 -> CM2 -> AM2 -> AM3 -> AM4 -> TD2 -> TD3 -> TD4\n\ngate: RISK FLAGGED\n  - float column overstates chain ['DM1', 'DM2', 'DM3', 'DM4'] buffer 56d vs 11d shared (ratio 5.1)\n  - slack task AM1 re-routes the critical path at a 4d slip (within the 7d alarm window)\n\nshared-float deception (worst chain)\n----------------------------------------------------\n  chain: DM1 -> DM2 -> DM3 -> DM4\n  float column sums to 56 days; real shared buffer 11 days (overstated 5.1x)\n\nthe non-obvious task\n----------------------------------------------------\n  AM1 (Service inventory and assessment) is off the critical path with 3 days float, yet a 5-day slip delays go-live 2 days; it re-routes the critical path at a 4-day slip\n\nblast-radius ranking (5-day slip, top 12)\n----------------------------------------------------\n  task   delay  float  reroute  on critical path\n  CM1        5      0        1  yes\n  CM2        5      0        1  yes\n  AM2        5      0        1  yes\n  AM3        5      0        1  yes\n  AM4        5      0        1  yes\n  TD2        5      0        1  yes\n  TD3        5      0        1  yes\n  TD4        5      0        1  yes\n  AM1        2      3        4  no\n  DM1        0     11       12  no\n  CM3        0     11       12  no\n  DM2        0     11       12  no\n\nboundary: the single-slip blind spot\n----------------------------------------------------\n  DM2 and DM3 each absorb a slip of 11 days with 0 delay alone (0 and 0); slipped together they delay go-live 11 days"
+    },
+    {
+      "command": "cpr analyze fixtures/program.json --gate --quiet",
+      "exit_code": 2,
+      "duration_s": 0.066,
+      "output": ""
+    },
+    {
+      "command": "python experiments/exp05_robustness.py",
+      "exit_code": 0,
+      "duration_s": 0.668,
+      "output": "Experiment 5: robustness across random programs\n  programs             1000 (1000 had a slack chain)\n  overstated >= 2.0x    1000 (100.0%)\n  median worst ratio   4.0x\n  re-route in 7d window 291 (29.1%)"
+    },
+    {
+      "command": "python tools/check_numbers.py",
+      "exit_code": 0,
+      "duration_s": 0.038,
+      "output": "check_numbers: OK, 20 metrics anchored in 2 documents"
+    }
+  ]
+}
