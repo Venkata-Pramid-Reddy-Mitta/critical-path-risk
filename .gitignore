@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Test and coverage
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+coverage.json
+htmlcov/
+reports/
+
+# The generated HTML report is a build artifact; make verify rebuilds it.
+# Committed evidence (SVG diagram, PNG screenshots, GIF) is kept in git so it
+# renders on GitHub; only the intermediate webm and the heavy MP4 are ignored.
+docs/report/
+docs/video/*.webm
+
+# Virtual envs
+.venv/
+venv/

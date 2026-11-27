@@ -1,0 +1,34 @@
+# Analysis policy. Every threshold a reviewer might argue about lives here, not
+# in the code, so a program office can tune the gate without touching Python.
+# The CLI loads this file (or one passed with --policy) and the defaults in
+# cpr/config.py match it line for line.
+
+[horizon]
+# The slip size, in working days, the analysis stresses every task with. One
+# week of elapsed time is five working days; the sensitivity ranking and the
+# re-routing report both use this. Change it to model a two-week slip.
+slip_days = 5
+
+# A task whose critical-path re-routing threshold is at or below this many days
+# is "within reach": a reviewer scanning the Gantt would call it non-critical,
+# but a plausible slip turns it critical. This is the review blind spot.
+review_blind_spot_days = 7
+
+[gate]
+# The CLI exits 2 (risk flagged) when either condition holds. Exit 0 means the
+# program is clean against this policy; exit 1 is reserved for "could not
+# analyze" (bad input, a cycle), never for "analyzed and found risk".
+
+# Flag when any slack chain's reported total-float sum overstates its true
+# shared buffer by at least this ratio. 2.0 means "the column claims at least
+# twice the buffer the chain actually has".
+max_float_overstatement_ratio = 2.0
+
+# Flag when any off-critical task sits within this many days of re-routing the
+# critical path. Set equal to review_blind_spot_days by default.
+rerouting_alarm_days = 7
+
+[report]
+# How many tasks to show in the blast-radius table. The ranking is computed for
+# every task; this only trims the printed view.
+top_n = 12

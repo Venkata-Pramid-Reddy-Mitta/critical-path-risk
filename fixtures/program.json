@@ -1,0 +1,23 @@
+{
+  "name": "Banking cloud modernization program (illustrative)",
+  "unit": "working days",
+  "note": "A deliberately constructed WBS, not a captured one. It is built so the float column overstates one chain's buffer threefold and one slack task sits a few days from re-routing the critical path, because those are the cases the tool exists to catch. Durations and dependencies are the only inputs; every published number is derived from them by code.",
+  "tasks": [
+    {"id": "CM1", "name": "Landing zone design", "workstream": "Cloud Migration", "duration": 8, "deps": []},
+    {"id": "CM2", "name": "Network and identity baseline", "workstream": "Cloud Migration", "duration": 10, "deps": ["CM1"]},
+    {"id": "CM3", "name": "Core landing zone build", "workstream": "Cloud Migration", "duration": 12, "deps": ["CM2"]},
+    {"id": "CM4", "name": "Production subscription hardening", "workstream": "Cloud Migration", "duration": 9, "deps": ["CM3"]},
+    {"id": "AM1", "name": "Service inventory and assessment", "workstream": "App Modernization", "duration": 7, "deps": ["CM1"]},
+    {"id": "AM2", "name": "Refactor authentication service", "workstream": "App Modernization", "duration": 11, "deps": ["AM1", "CM2"]},
+    {"id": "AM3", "name": "Refactor payments service", "workstream": "App Modernization", "duration": 14, "deps": ["AM2"]},
+    {"id": "AM4", "name": "Containerize and build pipeline", "workstream": "App Modernization", "duration": 8, "deps": ["AM3", "CM3"]},
+    {"id": "DM1", "name": "Schema mapping", "workstream": "Data Migration", "duration": 9, "deps": ["CM1"]},
+    {"id": "DM2", "name": "ETL build", "workstream": "Data Migration", "duration": 13, "deps": ["DM1"]},
+    {"id": "DM3", "name": "Bulk migration dry run", "workstream": "Data Migration", "duration": 10, "deps": ["DM2", "CM3"]},
+    {"id": "DM4", "name": "Reconciliation and cutover rehearsal", "workstream": "Data Migration", "duration": 7, "deps": ["DM3"]},
+    {"id": "TD1", "name": "Test strategy and environments", "workstream": "Testing and Deployment", "duration": 6, "deps": ["CM2"]},
+    {"id": "TD2", "name": "Integration test suite", "workstream": "Testing and Deployment", "duration": 10, "deps": ["AM4", "DM3", "TD1"]},
+    {"id": "TD3", "name": "User acceptance testing", "workstream": "Testing and Deployment", "duration": 9, "deps": ["TD2"]},
+    {"id": "TD4", "name": "Production cutover and go-live", "workstream": "Testing and Deployment", "duration": 5, "deps": ["TD3", "CM4", "DM4"]}
+  ]
+}

@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "critical-path-risk"
+version = "0.3.0"
+description = "Ranks WBS tasks by the true blast radius of a slip, computed by propagating the delay through the dependency graph rather than read off a total-float column."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Venkata Pramid Reddy Mitta" }]
+dependencies = []
+
+[project.optional-dependencies]
+# Everything the runtime needs is in the standard library. These extras are
+# only for development: the test runner, coverage, and the lint/evidence tools.
+dev = [
+    "pytest>=8",
+    "pytest-cov>=5",
+    "coverage>=7",
+    "ruff>=0.5",
+    "cmarkgfm>=2024.1.14",
+]
+evidence = ["playwright>=1.40"]
+
+[project.scripts]
+cpr = "cpr.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# -p no:randomly is not used; determinism is a property of the code, not the
+# runner, and the suite asserts it directly in test_determinism.py.
+addopts = "--strict-markers"
+
+[tool.coverage.run]
+branch = true
+source = ["cpr"]
+omit = ["src/cpr/cli.py"]
+
+[tool.coverage.report]
+# The CLI is exercised end to end by subprocess tests and by make verify, so it
+# is covered behaviorally but not by in-process line counting; omitting it
+# keeps the library coverage honest rather than padded by argparse plumbing.
+exclude_lines = ["pragma: no cover", "if __name__ == .__main__.:"]

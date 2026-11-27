@@ -1,0 +1,17 @@
+# Line length chosen at 100: wide enough that the CPM passes read as prose and
+# narrow enough to review two files side by side on a laptop. Held to across the
+# whole tree, not aspirational.
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF"]
+# RUF002/RUF003 flag non-ASCII punctuation (the em dash hunt lives in CI too).
+ignore = []
+
+[lint.per-file-ignores]
+# Experiments and tools print tables and build HTML, so they are allowed longer
+# lines than the library; tests may shadow builtins in fixtures.
+"experiments/*" = ["E501"]
+"tools/*" = ["E501"]
+"tests/*" = ["B011"]
